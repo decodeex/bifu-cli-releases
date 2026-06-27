@@ -9,9 +9,10 @@ auth: required
 Activate for spot orders and spot account balances. Requires a logged-in profile
 (see the bifu-auth skill).
 
-`--symbol` is the numeric **symbolId** (not "BTCUSDT"). Common dev symbolIds:
-`90000001`=BTC-USDT, `90000002`=ETH-USDT, `90000004`=SOL-USDT, `90000010`=DOGE-USDT.
-Full list: `GET /api/v1/public/meta/getMetaData` → `symbolList`.
+`--symbol` accepts a **symbol name** (`BTCUSDT`, `BTC-USDT`) or the numeric
+**symbolId** — names are auto-resolved via `getMetaData` and the mapping is
+printed. Common dev symbolIds: `90000001`=BTC-USDT, `90000002`=ETH-USDT,
+`90000004`=SOL-USDT, `90000010`=DOGE-USDT. Full list: `GET /api/v1/public/meta/getMetaData` → `symbolList`.
 
 ## Balance
 
@@ -23,7 +24,8 @@ bifu-cli spot balance --json
 ## Create order
 
 ```bash
-# Market buy 0.0001 BTC
+# Market buy 0.0001 BTC (symbol name or numeric symbolId both work)
+bifu-cli spot order create --symbol BTCUSDT --side BUY --size 0.0001
 bifu-cli spot order create --symbol 90000001 --side BUY --size 0.0001
 # Limit sell
 bifu-cli spot order create --symbol 90000001 --side SELL --type LIMIT --price 100000 --size 0.001

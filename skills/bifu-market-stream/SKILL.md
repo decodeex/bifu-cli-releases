@@ -10,11 +10,17 @@ Activate to stream live public market data. No authentication required. For
 private trading events, use bifu-private-stream.
 
 ```bash
-bifu-cli ws market --channels ticker.BTCUSDT
-bifu-cli ws market --channels ticker.BTCUSDT,depth.BTCUSDT
+bifu-cli ws market --channels ticker.BTCUSDT          # symbol — auto-resolved
+bifu-cli ws market --channels ticker.10000001         # numeric instrumentId
+bifu-cli ws market --channels ticker.all              # every ticker
+bifu-cli ws market --channels ticker.BTCUSDT,depth.SOLUSDT.15
 ```
 
-Channels are `<type>.<symbol>` (e.g. `ticker.BTCUSDT`, `depth.BTCUSDT`).
+Channels are `<type>.<instrumentId>[.<extra>]`. The `<instrumentId>` may be a
+**numeric ID** or a **symbol name** — the CLI resolves names via `getMetaData`
+and prints the mapping. Disambiguation: `/` → contract (`BTC/USDT`), `-` → spot
+(`BTC-USDT`), no separator → contract first then spot (`BTCUSDT`). `ticker.all`
+streams every ticker. The numeric ID is still accepted and needs no lookup.
 
 ## Endpoints
 

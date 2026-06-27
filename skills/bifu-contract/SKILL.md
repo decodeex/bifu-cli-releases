@@ -9,8 +9,9 @@ auth: required
 Activate for perpetual/futures orders, positions, and contract account info.
 Requires a logged-in profile (see bifu-auth).
 
-`--contract` is the numeric **contractId** (not "BTC-USDT-SWAP"). On dev,
-`10000001` = BTC perpetual.
+`--contract` accepts a **symbol name** (`BTCUSDT`, `BTC/USDT`) or the numeric
+**contractId** — names are auto-resolved via `getMetaData` and the mapping is
+printed. On dev, `10000001` = BTC perpetual (BTC/USDT).
 
 Direction model: position side `--side LONG|SHORT`, order side
 `--order-side BUY|SELL`. Open long = LONG+BUY; close long = LONG+SELL `--reduce-only`;
