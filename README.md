@@ -658,16 +658,19 @@ bifu-cli ws pushgw --market-watch --login-ids 90390034
 
 ## mcp — AI Agent 接入 (Model Context Protocol)
 
-把 bifu-cli 的交易能力暴露成 MCP 工具,让 AI 助手(Claude Desktop、Cursor、VS Code 等)
-直接查询余额/持仓/挂单并下单/撤单(用当前 profile 的会话)。
+把 bifu-cli 的交易能力暴露成 MCP 工具,让 AI 代理(Claude Code、Codex、Cursor、
+VS Code、Claude Desktop 等)直接查询余额/持仓/挂单并下单/撤单(用当前 profile 的会话)。
 
 ```bash
 # 运行 stdio MCP server(一般由客户端拉起,不用手动跑)
 bifu-cli --profile dev mcp serve
 
 # 一键注册到客户端(写入其 MCP 配置)
-bifu-cli --profile dev mcp setup --client cursor
-bifu-cli --profile dev mcp setup --client claude
+bifu-cli --profile dev mcp setup --client claude          # Claude Code(claude mcp add → ~/.claude.json)
+bifu-cli --profile dev mcp setup --client codex           # OpenAI Codex(codex mcp add;含桌面版 Codex.app)
+bifu-cli --profile dev mcp setup --client cursor          # Cursor → ~/.cursor/mcp.json
+bifu-cli --profile dev mcp setup --client vscode          # VS Code
+bifu-cli --profile dev mcp setup --client claude-desktop  # Claude Desktop 桌面 App
 bifu-cli mcp setup            # 不传 --client 时打印配置片段供手动添加
 ```
 
@@ -676,8 +679,10 @@ bifu-cli mcp setup            # 不传 --client 时打印配置片段供手动�
 `list_forex_accounts`、`create_spot_order`、`create_contract_order`、
 `cancel_spot_order`、`cancel_contract_order`。
 
-> `mcp setup` 会把可执行文件路径 + `mcp serve --profile <当前 profile>` 合并进客户端配置
-> (Claude Desktop / Cursor `~/.cursor/mcp.json` / VS Code),保留已有条目,重启客户端即可生效。
+> `mcp setup` 会把可执行文件路径 + `mcp serve --profile <当前 profile>` 注册进各客户端:
+> CLI 类(Claude Code / Codex)走官方 `… mcp add`;GUI 类(Cursor / VS Code / Claude Desktop)
+> 合并进其 JSON 配置并保留已有条目。配置路径**按系统自动选择**(macOS `~/Library/Application
+> Support/…`、Windows `%APPDATA%`、Linux `~/.config`),注册后重启对应客户端即可生效。
 
 ---
 
@@ -813,7 +818,10 @@ git tag v1.2.0 && git push origin v1.2.0
 - **`.github/workflows/release.yml`**:GoReleaser 跨平台编译(darwin/linux/windows × amd64/arm64)→ 建 GitHub Release(含 checksums)→ 推 Homebrew cask 到 `decodeex/homebrew-tap` → 发 `@decodeex/bifu-cli` 到 npm。
 - **`.github/workflows/ci.yml`**:push/PR 跑 gofmt + build + vet + test + `goreleaser check`、staticcheck,以及 security 关卡(`govulncheck` 依赖/stdlib CVE + `gosec` 静态安全分析)。
 - **`.github/workflows/pages.yml`**:把 `install.sh` 同步进 `docs/` 并部署到 GitHub Pages(`cli.bifu.dev`)。
+- **`.github/workflows/prerelease.yml`**:每次推 `develop` → 发内部预发布 `vX.Y.Z-rc.<run>`(X.Y.Z=最新正式版的下一个 patch),作为 **GitHub Pre-release**(跨平台二进制+checksums)发到 releases 仓库;**不推 npm/brew**。审核通过后合并 `develop`→`main` 并打 `vX.Y.Z` 走正式发布。
 - **`.github/workflows/sync-upstream.yml`**:`main` 有改动时,把 `main` 强制镜像到开源上游 `bifu-ai/bifu-cli`(单向托管镜像,勿直接改上游)。
+
+> 发布通道:`develop` 推送 = rc 预发布(仅 GitHub Pre-release 二进制,供审核);`vX.Y.Z` tag(在 main 上)= 正式版(GitHub Release + npm + Homebrew + 文档同步)。`install.sh` 的 `releases/latest` 只取正式版,不会拿到 rc。
 
 ### 一次性准备
 
@@ -823,7 +831,7 @@ git tag v1.2.0 && git push origin v1.2.0
 | Secret `NPM_TOKEN` | npm `@decodeex` org 的自动化发布 token |
 | 仓库 `decodeex/homebrew-tap` | 新建空仓库(GoReleaser 首次发布会写入 `Casks/bifu-cli.rb`) |
 | 仓库 `bifu-ai/bifu-cli` | 新建公开仓库(开源上游镜像;`sync-upstream.yml` 把 `main` 推到这里) |
-| Secret `UPSTREAM_SYNC_TOKEN` | 对 `bifu-ai/bifu-cli` 有 `contents: write` 权限的 PAT/细粒度 token(上游同步用) |
+| Secret `UPSTREAM_SYNC_SSH_KEY` | 写权限 **deploy key** 的私钥(公钥加到 `bifu-ai/bifu-cli` 的 Deploy keys,勾选 write)——仅对该仓库可写,最小权限,无过期 |
 | GitHub Pages | 仓库 Settings → Pages → Source 选 **GitHub Actions** |
 | DNS | 给 `cli.bifu.dev` 加 CNAME 记录指向 `decodeex.github.io`(`docs/CNAME` 已声明该域名) |
 
