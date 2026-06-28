@@ -235,7 +235,7 @@ bifu-cli spot balance -o json
 ```
 
 > `--symbol` 可传**符号名**（`BTCUSDT`、`BTC-USDT`）或**数值 symbolId**，符号名会经
-> `getMetaData` 自动解析并打印映射。常用 dev 现货 symbolId：
+> `getMetaData` 自动解析并打印映射。常用现货 symbolId（dev/prod 同号）：
 > `90000001` = BTC-USDT、`90000002` = ETH-USDT、`90000004` = SOL-USDT、`90000010` = DOGE-USDT。
 > 完整列表见 `GET /api/v1/public/meta/getMetaData` 的 `symbolList`。
 
@@ -313,7 +313,7 @@ bifu-cli contract position --contract 10000001
 ### 下单
 
 > `--contract` 可传**符号名**（`BTCUSDT`、`BTC/USDT`）或**数值 contractId**,符号名会经
-> `getMetaData` 自动解析并打印映射。dev 上 `10000001` = BTC 永续（BTC/USDT）。
+> `getMetaData` 自动解析并打印映射。`10000001` = BTC 永续（BTC/USDT，dev/prod 同号）。
 > 仓位方向用 `--side LONG|SHORT`，下单方向用 `--order-side BUY|SELL`：开多=LONG+BUY，平多=LONG+SELL（加 `--reduce-only`），开空=SHORT+SELL，平空=SHORT+BUY。
 
 ```bash
@@ -664,6 +664,11 @@ VS Code、Claude Desktop 等)直接查询余额/持仓/挂单并下单/撤单(�
 ```bash
 # 运行 stdio MCP server(一般由客户端拉起,不用手动跑)
 bifu-cli --profile dev mcp serve
+
+# 或走 Streamable HTTP 传输(远程/共享部署),挂在 http://<addr>/mcp
+bifu-cli --profile dev mcp serve --http 127.0.0.1:8080            # --path 自定义路径,--stateless 无状态
+#   注册:claude mcp add --transport http bifu http://127.0.0.1:8080/mcp
+#   ⚠ HTTP 按当前 profile 会话执行且无逐请求鉴权 → 绑 127.0.0.1,勿裸奔对外
 
 # 一键注册到客户端(写入其 MCP 配置)
 bifu-cli --profile dev mcp setup --client claude          # Claude Code(claude mcp add → ~/.claude.json)
